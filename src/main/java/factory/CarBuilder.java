@@ -68,4 +68,8 @@ public class CarBuilder {
     public void setStatus(Integer i, WorkerStatus newStatus) {
         statuses[i] = newStatus;
     }
+
+    public void stop() throws InterruptedException {
+        workers.stop();
+    }
 }

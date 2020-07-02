@@ -1,6 +1,5 @@
 package factory;
 
-
 import carParts.Car;
 
 import java.io.File;
@@ -23,29 +22,32 @@ public class Dealer implements Runnable {
         this.doLogging = doLogging;
 
         if (doLogging) {
-            SimpleDateFormat s = new SimpleDateFormat("dd-MM-yyyy_HH:mm:ss");
             file = new File("log.txt");
         }
     }
 
     public void run() {
+        Car c;
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Car c = carStorage.get();
-                if (doLogging) {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-                    String date = dateFormat.format(new Date());
-                    String endString = date + ": Dealer " + Thread.currentThread().getName() + ": Auto " + c.getCarID() + " (Body: " + c.getBody().getPartID() + ", Engine: " + c.getEngine().getPartID() + ", Accessory: " + c.getAccessory().getPartID() + ")\n";
-                    synchronized (file) {
-                        try {
-                            Files.write(file.toPath(), endString.getBytes(), WRITE, APPEND, CREATE);
-                        }
-                        catch (IOException e){
-                            System.err.println("Failed to log selling data. Turning off logging...");
-                            doLogging = false;
-                        }
+                c = carStorage.get();
+            } catch (InterruptedException exc) {
+                break;
+            }
+            if (doLogging) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                String date = dateFormat.format(new Date());
+                String endString = date + ": Dealer " + Thread.currentThread().getName() + ": Auto " + c.getCarID() + " (Body: " + c.getBody().getPartID() + ", Engine: " + c.getEngine().getPartID() + ", Accessory: " + c.getAccessory().getPartID() + ")\n";
+                synchronized (file) {
+                    try {
+                        Files.write(file.toPath(), endString.getBytes(), WRITE, APPEND, CREATE);
+                    } catch (IOException e) {
+                        System.err.println("Failed to log selling data. Turning off logging...");
+                        doLogging = false;
                     }
                 }
+            }
+            try {
                 Thread.sleep(period);
             } catch (InterruptedException e) {
                 return;

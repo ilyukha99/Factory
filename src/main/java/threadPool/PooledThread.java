@@ -10,28 +10,30 @@ public class PooledThread extends Thread {
         this.taskQueue = taskQueue;
     }
 
-    private void performTask(ThreadPoolTask t) {
-        try {
-            t.go();
-        } catch (InterruptedException ex) {
-        }
+    private void performTask(ThreadPoolTask t) throws InterruptedException {
+        t.go();
     }
 
     public void run() {
         ThreadPoolTask toExecute;
-        while (true) {
+        while (!isInterrupted()) {
             synchronized (taskQueue) {
                 if (taskQueue.isEmpty()) {
                     try {
                         taskQueue.wait();
                     } catch (InterruptedException ex) {
+                        return;
                     }
                     continue;
                 } else {
                     toExecute = taskQueue.remove(0);
                 }
             }
-            performTask(toExecute);
+            try {
+                performTask(toExecute);
+            } catch (InterruptedException exception) {
+                break;
+            }
         }
     }
 }

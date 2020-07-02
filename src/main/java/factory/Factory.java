@@ -50,19 +50,29 @@ public class Factory {
         }
 
         threads = new ArrayList<>();
-        threads.add(new Thread(enginesSupplier));
-        threads.add(new Thread(bodiesSupplier));
+        threads.add(new Thread(enginesSupplier, "enginesSupplier"));
+        threads.add(new Thread(bodiesSupplier, "bodiesSupplier"));
 
         for (var supplier : accessoriesSuppliers) {
-            threads.add(new Thread(supplier));
+            threads.add(new Thread(supplier, "accessoriesSuppliers"));
         }
 
         int count = 0;
         for (var dealer : dealers) {
-            threads.add(new Thread(dealer, String.valueOf(count++)));
+            threads.add(new Thread(dealer, "dealer" + String.valueOf(count++)));
         }
 
-        threads.add(new Thread(controller));
+        threads.add(new Thread(controller, "controller"){
+            @Override
+            public void interrupt() {
+                try {
+                    controller.stop();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                super.interrupt();
+            }
+        });
     }
 
     public void start() {
@@ -71,9 +81,13 @@ public class Factory {
         }
     }
 
-    public void stop() {
+    public void stop() throws InterruptedException {
         for (var thread : threads) {
             thread.interrupt();
+        }
+        for (var thread : threads) {
+            if (thread.isAlive())
+                thread.join();
         }
     }
 

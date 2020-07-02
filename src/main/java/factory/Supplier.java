@@ -20,7 +20,10 @@ public class Supplier<T extends CarPart> implements Runnable {
                 T detail = partType.getDeclaredConstructor().newInstance();
                 storage.put(detail);
                 Thread.sleep(period);
-            } catch (Exception e){
+            } catch (InterruptedException e){
+                break;
+            }
+            catch (Exception e){
             }
         }
     }

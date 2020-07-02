@@ -11,23 +11,17 @@ public class Storage<T> {
         units = new ArrayList<>();
     }
 
-    public synchronized void put(T detail) {
+    public synchronized void put(T detail) throws InterruptedException {
         while (units.size() == capacity) {
-            try {
-                wait();
-            } catch (InterruptedException ignored) {
-            }
+            wait();
         }
         units.add(detail);
         notifyAll();
     }
 
-    public synchronized T get() {
+    public synchronized T get() throws InterruptedException {
         while (units.size() == 0) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-            }
+            wait();
         }
         T detail = units.remove(units.size() - 1);
         notifyAll();

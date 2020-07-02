@@ -38,7 +38,11 @@ public class MainFrame extends JFrame implements Runnable {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
-                factory.stop();
+                try {
+                    factory.stop();
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                }
                 System.exit(0);
             }
         });
